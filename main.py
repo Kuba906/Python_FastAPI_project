@@ -62,7 +62,7 @@ def create_patient(patient: Patient):
     add_days = len(patient.name) +len(patient.surname)
     patient_dict.update({"id": len(db)+1,
     "register_date": datetime.date.today(),
-     "vaccination_date":datetime.date.today()+datetime.timedelta(days=+add_days) })
+     "vaccination_date":datetime.date.today()+datetime.timedelta(days=add_days) })
 
 
     db.append(patient_dict)
