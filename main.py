@@ -40,7 +40,7 @@ def root():
 
 
 @app.get("/auth",status_code = status.HTTP_204_NO_CONTENT)
-def check(password: str, password_hash: str,response: Response):
+def check(response: Response,password: str='', password_hash: str=''):
     h = hashlib.sha512( str( password ).encode("utf-8") ).hexdigest()
     if(h.strip() == password_hash.strip()):
         response.status_code = status.HTTP_204_NO_CONTENT
