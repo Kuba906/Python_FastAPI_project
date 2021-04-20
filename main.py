@@ -42,6 +42,9 @@ def root():
 @app.get("/auth",status_code = status.HTTP_204_NO_CONTENT)
 def check(response: Response,password: str='', password_hash: str=''):
     h = hashlib.sha512( str( password ).encode("utf-8") ).hexdigest()
+    if(h.strip() == '' || password_hash.strip() == 0 ):
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return 401
     if(h.strip() == password_hash.strip()):
         response.status_code = status.HTTP_204_NO_CONTENT
         return 204
