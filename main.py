@@ -59,11 +59,16 @@ def check(response: Response,password: str='', password_hash: str=''):
 @app.post("/register",status_code=status.HTTP_201_CREATED)
 def create_patient(patient: Patient):
     patient_dict = patient.dict()
-    add_days = len(patient.name) +len(patient.surname)
+    add_days = 0
+    for char in range(0,len(patient.name)):
+        if(patient.name[char].isalpha()==True):
+            add_days = add_days + 1
+    for char in range(0,len(patient.surname)):
+        if(patient.surname[char].isalpha()==True):
+            add_days = add_days + 1
     patient_dict.update({"id": len(db)+1,
     "register_date": datetime.date.today(),
-     "vaccination_date":datetime.date.today()+datetime.timedelta(days+=add_days) })
-
+     "vaccination_date":datetime.date.today()+datetime.timedelta(days=+add_days) })
 
     db.append(patient_dict)
     return db[-1]
