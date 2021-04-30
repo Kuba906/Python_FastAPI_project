@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Response, status
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional
+from datetime import date
 import datetime
 import hashlib
 
@@ -84,3 +86,21 @@ def get_patient(id: int,response: Response):
         return 404
     
     return db[id-1]
+
+@app.get("/hello",response_class=HTMLResponse)
+def root():
+    today = date.today()
+    # d1 = today.strftime("%d-%m-%Y")
+    d1 = today.strftime("%Y-%m-%d")
+
+
+    return f"""
+    <html>
+        <head>
+            <title>content-type</title>
+        </head>
+        <body>
+            <h1>Hello! Today date is {d1}</h1>
+        </body>
+    </html>
+    """.format(d1)
