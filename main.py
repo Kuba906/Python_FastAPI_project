@@ -129,6 +129,9 @@ def login_session( response: Response, credentials: HTTPBasicCredentials = Depen
     response.set_cookie(key="session_token", value=session_token)
     app.access_sessions.append(session_token)
 
+    if len(app.access_sessions) > 3:
+        app.access_sessions.pop(0)
+
 
 @app.post("/login_token",status_code = status.HTTP_201_CREATED)
 def login_token( response: Response, credentials: HTTPBasicCredentials = Depends(security)):
@@ -139,6 +142,9 @@ def login_token( response: Response, credentials: HTTPBasicCredentials = Depends
             status_code=status.HTTP_401_UNAUTHORIZED)
     session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest()
     app.access_tokens.append(session_token)
+    if len(app.access_token) > 3:
+        app.access_tokens.pop(0)
+
     return {"token": session_token}
 
 
