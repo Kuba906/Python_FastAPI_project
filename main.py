@@ -9,13 +9,12 @@ from hashlib import sha256
 from fastapi import Depends, FastAPI, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi import FastAPI, Response, Cookie, HTTPException
+import secrets
 
 
 app = FastAPI()
 security = HTTPBasic()
 app.secret_key = 'dsadsafdsnfdsjkn321ndsalndsa'
-app.counter = 1
-app.session_token = ''
 
 class Patient(BaseModel):
     id: Optional[int] = None
@@ -116,33 +115,21 @@ def root():
 
 @app.post("/login_session",status_code = status.HTTP_201_CREATED)
 def login_session( response: Response, credentials: HTTPBasicCredentials = Depends(security)):
-    username = credentials.username
-    password = credentials.password
-    if(username == "4dm1n" and password == "NotSoSecurePa$$"):
-        session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest() +str(app.counter)
-        app.session_token = session_token
-        response.set_cookie(key="session_token", value=session_token)
-        app.counter = app.counter +1
-
-    else:    
-        response.status_code = 401
-        return response
+    username = secrets.compare_digest(credentials.username, "4dm1n")
+    password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
+    if not (username and password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED)
+    session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest()
+    response.set_cookie(key="session_token", value=session_token)
 
 
 @app.post("/login_token",status_code = status.HTTP_201_CREATED)
-def login_token( response: Response, session_token: str = Cookie(None),credentials: HTTPBasicCredentials = Depends(security)):
-    username = credentials.username
-    password = credentials.password
+def login_token( response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+    username = secrets.compare_digest(credentials.username, "4dm1n")
+    password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
+    if not (username and password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED)
     session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest()
-    if(username == "4dm1n" and password == "NotSoSecurePa$$"):
-        session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest() +str(app.counter)
-        app.session_token = session_token
-        response.set_cookie(key="session_token", value=session_token)
-        app.counter = app.counter +1
-        return { "token":app.session_token}
-    elif session_token == session_token:
-        return { "token":app.session_token}
-
-    else:
-        response.status_code = 401
-        return response
+    return {"token": session_token}
