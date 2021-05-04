@@ -126,7 +126,7 @@ def login_session( response: Response, credentials: HTTPBasicCredentials = Depen
     if not (username and password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED)
-    rand = random.randint(0,500000)
+    rand = str(random.randint(0,500000))
     session_token = sha256(f"{username}{password}{app.secret_key}{rand}".encode()).hexdigest()
     response.set_cookie(key="session_token", value=session_token)
     if len(app.access_sessions) > 3:
@@ -142,7 +142,7 @@ def login_token( response: Response, credentials: HTTPBasicCredentials = Depends
     if not (username and password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED)
-    rand = random.randint(0,500000)
+    rand = str(random.randint(0,500000))
     session_token = sha256(f"{username}{password}{app.secret_key}{rand}".encode()).hexdigest()
     if len(app.access_tokens) > 3:
         app.access_tokens.pop(0)
