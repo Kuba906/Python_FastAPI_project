@@ -5,9 +5,16 @@ from typing import Optional
 from datetime import date
 import datetime
 import hashlib
+from hashlib import sha256
+from fastapi import Depends, FastAPI, Request
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import FastAPI, Response, Cookie, HTTPException
 
 
 app = FastAPI()
+security = HTTPBasic()
+app.secret_key = 'dsadsafdsnfdsjkn321ndsalndsa'
+app.session_token = ''
 
 class Patient(BaseModel):
     id: Optional[int] = None
@@ -104,3 +111,34 @@ def root():
         </body>
     </html>
     """.format(d1)
+
+
+@app.post("/login_session",status_code = status.HTTP_201_CREATED)
+def login_session( response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+    username = credentials.username
+    password = credentials.password
+    session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest()
+    if(username == "4dm1n" and password == "NotSoSecurePa$$"):
+        response.set_cookie(key="session_token", value=session_token)
+        app.session_token = session_token
+
+    else:    
+        response.status_code = 401
+        return response
+
+
+@app.post("/login_token",status_code = status.HTTP_201_CREATED)
+def login_token( response: Response, session_token: str = Cookie(None),credentials: HTTPBasicCredentials = Depends(security)):
+    username = credentials.username
+    password = credentials.password
+    session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest()
+    if(username == "4dm1n" and password == "NotSoSecurePa$$"):
+        response.set_cookie(key="session_token", value=session_token)
+        app.session_token = session_token
+        return { "token":app.session_token}
+    elif session_token == session_token:
+        return { "token":app.session_token}
+
+    else:    
+        response.status_code = 401
+        return response
