@@ -113,7 +113,7 @@ def root():
     """.format(d1)
 
 
-@app.post("/login_session",status_code = status.HTTP_201_CREATED)
+@app.post("/login_session",status_code = 201)
 def login_session( response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     username = credentials.username
     password = credentials.password
@@ -127,7 +127,7 @@ def login_session( response: Response, credentials: HTTPBasicCredentials = Depen
         return response
 
 
-@app.post("/login_token",status_code = status.HTTP_201_CREATED)
+@app.post("/login_token",status_code = 201)
 def login_token( response: Response, session_token: str = Cookie(None),credentials: HTTPBasicCredentials = Depends(security)):
     username = credentials.username
     password = credentials.password
@@ -136,7 +136,7 @@ def login_token( response: Response, session_token: str = Cookie(None),credentia
         response.set_cookie(key="session_token", value=session_token)
         app.session_token = session_token
         return { "token":app.session_token}
-    if session_token == session_token:
+    elif session_token == session_token:
         return { "token":app.session_token}
 
     else:    
