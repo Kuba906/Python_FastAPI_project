@@ -136,7 +136,7 @@ def login_token( response: Response, session_token: str = Cookie(None),credentia
         response.set_cookie(key="session_token", value=session_token)
         app.session_token = session_token
         return { "token":app.session_token}
-    elif session_token == session_token:
+    if session_token == session_token:
         return { "token":app.session_token}
 
     else:    
