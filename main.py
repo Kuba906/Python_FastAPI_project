@@ -148,19 +148,19 @@ def welcome_session(format:str = "", session_token: str = Cookie(None), status_c
             status_code=status.HTTP_401_UNAUTHORIZED)
     if format == 'json':
         return {"message": "Welcome!"}
-    if format == 'html':
-        return HTMLResponse(content = ' <h1>Welcome!</h1>')
+    elif format == 'html':
+        return HTMLResponse(content = '<h1>Welcome!</h1>')
     else:
-        return PlainTextResponse(content = 'Welcome! ')
+        return PlainTextResponse(content = 'Welcome!')
 
-@app.get("welcome_token")
+@app.get("/welcome_token")
 def welcome_session(format:str = "", token: str = "", status_code = status.HTTP_200_OK):
     if token not in app.access_tokens or token == '':
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED)
     if format == 'json':
         return {"message": "Welcome!"}
-    if format == 'html':
-        return HTMLResponse(content = ' <h1>Welcome!</h1>')
+    elif format == 'html':
+        return HTMLResponse(content = '<h1>Welcome!</h1>')
     else:
-        return PlainTextResponse(content = 'Welcome! ')
+        return PlainTextResponse(content = 'Welcome!')
