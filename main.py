@@ -173,7 +173,7 @@ def logout_session(format:str = "", session_token: str = Cookie(None)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED)
     app.access_sessions.remove(session_token)
-    response = RedirectResponse( ' /logged_out?format = ' + format, status_code = 302)
+    response = RedirectResponse( ' /logged_out?format=' + format, status_code = 302)
     return response
 
 @app.delete('/logout_token')
@@ -182,14 +182,14 @@ def logout_session(format:str = "", token: str = ""):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED)
     app.access_tokens.remove(token)
-    response = RedirectResponse( ' /logged_out?format = ' + format, status_code = 302)
+    response = RedirectResponse( ' /logged_out?format=' + format, status_code = 302)
     return response
 
 
 @app.get('/logged_out', status_code = status.HTTP_200_OK)
 def logged_out(format: str = ""):
     if format == 'json':
-        return {{"message": "Logged out!"}}
+        return {"message": "Logged out!"}
     elif format == 'html':
         return HTMLResponse(content = '<h1>Logged out!</h1>')
     else:
