@@ -10,11 +10,15 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi import FastAPI, Response, Cookie, HTTPException
 import secrets
+from fastapi.responses import PlainTextResponse
 
 
 app = FastAPI()
 security = HTTPBasic()
 app.secret_key = 'dsadsafdsnfdsjkn321ndsalndsa'
+app.counter = 1
+app.access_sessions = []
+app.access_tokens = []
 
 class Patient(BaseModel):
     id: Optional[int] = None
@@ -122,6 +126,7 @@ def login_session( response: Response, credentials: HTTPBasicCredentials = Depen
             status_code=status.HTTP_401_UNAUTHORIZED)
     session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest()
     response.set_cookie(key="session_token", value=session_token)
+    app.access_sessions.append(session_token)
 
 
 @app.post("/login_token",status_code = status.HTTP_201_CREATED)
@@ -132,4 +137,30 @@ def login_token( response: Response, credentials: HTTPBasicCredentials = Depends
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED)
     session_token = sha256(f"{username}{password}{app.secret_key}".encode()).hexdigest()
+    app.access_tokens.append(session_token)
     return {"token": session_token}
+
+
+@app.get("/welcome_session")
+def welcome_session(format:str = "", session_token: str = Cookie(None), status_code = status.HTTP_200_OK):
+    if session_token not in app.access_sessions or session_token == '':
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED)
+    if format == 'json':
+        return {"message": "Welcome!"}
+    if format == 'html':
+        return HTMLResponse(content = ' <h1>Welcome!</h1>')
+    else:
+        return PlainTextResponse(content = 'Welcome! ')
+
+@app.get("welcome_token")
+def welcome_session(format:str = "", token: str = "", status_code = status.HTTP_200_OK):
+    if token not in app.access_tokens or token == '':
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED)
+    if format == 'json':
+        return {"message": "Welcome!"}
+    if format == 'html':
+        return HTMLResponse(content = ' <h1>Welcome!</h1>')
+    else:
+        return PlainTextResponse(content = 'Welcome! ')
