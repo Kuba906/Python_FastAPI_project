@@ -240,6 +240,6 @@ async def customers():
 async def products(id: int):
     app.db_connection.row_factory = sqlite3.Row
     data = app.db_connection.execute(f'''SELECT ProductID id, ProductName name FROM Products WHERE id = {id}''' ).fetchone()
-    if data is None:
+    if data == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return {"id": id, "name": data['ProductName']}
+    return data
