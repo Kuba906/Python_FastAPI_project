@@ -12,7 +12,7 @@ from fastapi import FastAPI, Response, Cookie, HTTPException
 import secrets
 from fastapi.responses import PlainTextResponse, RedirectResponse
 import random
-
+import sqlite3
 
 
 app = FastAPI()
@@ -27,6 +27,8 @@ class Patient(BaseModel):
     name: str
     surname: str
 db = []
+
+
 
 @app.get("/",status_code = status.HTTP_200_OK)
 def root():
@@ -204,3 +206,31 @@ def logged_out(format: str = ""):
         return HTMLResponse(content = '<h1>Logged out!</h1>')
     else:
         return PlainTextResponse(content = 'Logged out!')
+
+
+@app.on_event("startup")
+async def startup():
+    app.db_connection = sqlite3.connect("northwind.db")
+    app.db_connection.text_factory = lambda b: b.decode(errors="ignore")  # northwind specific
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    app.db_connection.close()
+
+
+
+
+@app.get("/categories", status_code = status.HTTP_200_OK)
+async def categories():
+    app.db_connection.row_factory = sqlite3.Row
+    data = app.db_connection.execute('SELECT CategoryID id , CategoryName name FROM Categories ORDER BY CategoryID').fetchall()
+    return { "categories": data}
+
+@app.get("/customers",status_code = status.HTTP_200_OK)
+async def customers():
+    app.db_connection.row_factory = sqlite3.Row
+    data = app.db_connection.execute('''
+    SELECT CustomerID id, CompanyName name , COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '')|| ' ' || COALESCE(City,'') || ' ' || COALESCE(Country,'') AS full_address FROM Customers ORDER BY UPPER(CustomerID)
+    ''').fetchall()
+    return { "customers": data}
