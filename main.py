@@ -22,11 +22,25 @@ app.counter = 1
 app.access_sessions = []
 app.access_tokens = []
 
+
 class Patient(BaseModel):
     id: Optional[int] = None
     name: str
     surname: str
 db = []
+
+
+@app.on_event("startup")
+async def startup():
+    app.db_connection = sqlite3.connect("northwind.db")
+    app.db_connection.text_factory = lambda b: b.decode(errors="ignore")  # northwind specific
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    app.db_connection.close()
+
+
 
 
 
@@ -208,19 +222,6 @@ def logged_out(format: str = ""):
         return PlainTextResponse(content = 'Logged out!')
 
 
-@app.on_event("startup")
-async def startup():
-    app.db_connection = sqlite3.connect("northwind.db")
-    app.db_connection.text_factory = lambda b: b.decode(errors="ignore")  # northwind specific
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    app.db_connection.close()
-
-
-
-
 @app.get("/categories", status_code = status.HTTP_200_OK)
 async def categories():
     app.db_connection.row_factory = sqlite3.Row
@@ -234,3 +235,11 @@ async def customers():
     SELECT CustomerID id, CompanyName name , COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '')|| ' ' || COALESCE(City,'') || ' ' || COALESCE(Country,'') AS full_address FROM Customers ORDER BY UPPER(CustomerID)
     ''').fetchall()
     return { "customers": data}
+
+@app.get('/products/{id}', status_code=status.HTTP_200_OK)
+async def products(id: int):
+    app.db_connection.row_factory = sqlite3.Row
+    data = app.db_connection.execute(f'''SELECT ProductID id, ProductName name FROM Products WHERE id = {id}''' ).fetchone()
+    if data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return {"id": id, "name": data['ProductName']}
