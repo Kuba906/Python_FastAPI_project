@@ -243,3 +243,17 @@ async def products(id: int):
     if data == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return data
+
+@app.get('/employees', status_code=status.HTTP_200_OK)
+async def employees(limit: int = -1, offset: int = 0, order: str = 'id'):
+    names = {'first_name' : 'FirstName',
+     'last_name' : 'LastName', 
+     'city' : 'City', 
+     'id' : 'EmployeeID'}
+    app.db_connection.row_factory = sqlite3.Row
+    if order not in names.keys():
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST)
+    data = app.db_connection.execute(f'SELECT EmployeeID id, LastName last_name, FirstName first_name,\
+        City city FROM Employees ORDER BY {order} LIMIT {limit} OFFSET {offset}'
+        ).fetchall()
+    return {'employees' : data} 
