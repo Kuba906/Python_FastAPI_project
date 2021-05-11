@@ -29,6 +29,9 @@ class Patient(BaseModel):
     surname: str
 db = []
 
+class Category(BaseModel):
+
+    name : str
 
 @app.on_event("startup")
 async def startup():
@@ -243,7 +246,7 @@ async def products(id: int):
     if data == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return data
-##
+
 @app.get('/employees', status_code=status.HTTP_200_OK)
 async def employees(limit: int = -1, offset: int = 0, order: str = 'id'):
     names = {'first_name' : 'FirstName',
@@ -270,14 +273,49 @@ async def products_extended():
 async def products_id_orders(id: int):
     app.db_connection.row_factory = sqlite3.Row
     data = app.db_connection.execute(f"""SELECT Orders.OrderID id, Customers.CompanyName customer,
-                                    OD.Quantity quantity, 
-                                    ROUND((OD.UnitPrice* OD.Quantity) - (OD.Discount * (OD.UnitPrice * 
-                                    OD.Quantity)),2) total_price
-                                    FROM ((Orders JOIN "Order Details" OD ON OD.OrderID = Orders.OrderID)
-                                    JOIN Customers ON Customers.CustomerID = Orders.CustomerID)
-                                    WHERE OD.ProductID = {id} ORDER BY id""").fetchall()
+                                                   OD.Quantity quantity, 
+                                                   ROUND((OD.UnitPrice* OD.Quantity) - (OD.Discount * (OD.UnitPrice * 
+                                                                                                  OD.Quantity)),2) total_price
+                                                   FROM ((Orders JOIN "Order Details" OD ON OD.OrderID = Orders.OrderID)
+                                                         JOIN Customers ON Customers.CustomerID = Orders.CustomerID)
+                                                   WHERE OD.ProductID = {id} ORDER BY id""").fetchall()
     if len(data) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return {'orders' : data}
 
+@app.post('/categories', status_code = status.HTTP_201_CREATED)
+async def categories_post(category : Category):
+    getdata = app.db_connection.execute("INSERT INTO Categories (CategoryName) VALUES (?)",(category.name, ))
+    app.db_connection.commit()
+    id1 = getdata.lastrowid
+    app.db_connection.row_factory = sqlite3.Row
+    data = app.db_connection.execute(
+        """SELECT CategoryID id, CategoryName name FROM Categories WHERE CategoryID = ?""",(id1, )).fetchone()
+    return data
+
+@app.delete('/categories/{id}', status_code=status.HTTP_200_OK)
+async def categories_delete(id : int):
+    data = app.db_connection.execute(
+        "DELETE FROM Categories WHERE CategoryID = ?", (id, )
+    )
+    app.db_connection.commit()
+    if data.rowcount:
+        return {"deleted": 1}
+    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND)
+
+
+@app.put('/categories/{id}', status_code=status.HTTP_200_OK)
+async def categories_put(category : Category, id : int):
+    app.db_connection.row_factory = sqlite3.Row
+    app.db_connection.execute(
+        "UPDATE Categories SET CategoryName = ? WHERE CategoryID = ?", (
+            category.name, id, )
+    )
+    app.db_connection.commit()
+    data = app.db_connection.execute(
+        """SELECT CategoryID id, CategoryName name FROM Categories WHERE CategoryID = ?""",
+        (id, )).fetchone()
+    if data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return data
 
