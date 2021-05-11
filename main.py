@@ -269,12 +269,15 @@ async def products_extended():
 @app.get('/products/{id}/orders', status_code=status.HTTP_200_OK)
 async def products_id_orders(id: int):
     app.db_connection.row_factory = sqlite3.Row
-    data = app.db_connection.execute("""
-        SELECT o.OrderId AS id, c.CompanyName AS customer, od.Quantity AS quantity,
-        ROUND((od.UnitPrice * od.Quantity) - (od.Discount * (od.UnitPrice * od.Quantity)), 2) AS total_price
-        FROM Orders AS o JOIN Customers AS c USING (CustomerID)
-        JOIN 'Order Details' AS od USING (OrderId)
-        WHERE od.id= ?""", (id,)).fetchall()
+    data = app.db_connection.execute(f"""SELECT Orders.OrderID id, Customers.CompanyName customer,
+                                    OD.Quantity quantity, 
+                                    ROUND((OD.UnitPrice* OD.Quantity) - (OD.Discount * (OD.UnitPrice * 
+                                    OD.Quantity)),2) total_price
+                                    FROM ((Orders JOIN "Order Details" OD ON OD.OrderID = Orders.OrderID)
+                                    JOIN Customers ON Customers.CustomerID = Orders.CustomerID)
+                                    WHERE OD.ProductID = {id} ORDER BY id""").fetchall()
     if len(data) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return {'orders' : data}
+
+
