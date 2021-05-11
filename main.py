@@ -243,7 +243,7 @@ async def products(id: int):
     if data == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return data
-
+##
 @app.get('/employees', status_code=status.HTTP_200_OK)
 async def employees(limit: int = -1, offset: int = 0, order: str = 'id'):
     names = {'first_name' : 'FirstName',
