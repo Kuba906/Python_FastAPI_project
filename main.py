@@ -265,3 +265,16 @@ async def products_extended():
                                     FROM ((Products INNER JOIN Categories ON Categories.CategoryID = Products.CategoryID) INNER JOIN Suppliers ON 
                                     Suppliers.SupplierID = Products.SupplierID)''').fetchall()
     return {'products_extended' : data}
+
+@app.get('/products/{id}/orders', status_code=status.HTTP_200_OK)
+async def products_id_orders(id: int):
+    app.db_connection.row_factory = sqlite3.Row
+    data = app.db_connection.execute("""
+        SELECT o.OrderId AS id, c.CompanyName AS customer, od.Quantity AS quantity,
+        ROUND((od.UnitPrice * od.Quantity) - (od.Discount * (od.UnitPrice * od.Quantity)), 2) AS total_price
+        FROM Orders AS o JOIN Customers AS c USING (CustomerID)
+        JOIN 'Order Details' AS od USING (OrderId)
+        WHERE od.id= ?""", (id,)).fetchall()
+    if len(data) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return {'orders' : data}
