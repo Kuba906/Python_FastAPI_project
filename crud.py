@@ -45,7 +45,10 @@ def update_supplier(db: Session, id: int, supplier_update: schemas.UpdateSupplie
     return get_supplier(db, id)
 
 def delete_supplier(db: Session, id: int):
-    data = db.query(models.Supplier)\
-        .filter(models.Supplier.SupplierID == id).one()
-    db.delete(data)
+    check_supplier = get_supplier(db, id)
+    if not check_supplier:
+        raise HTTPException(status_code=404)
+    db.query(models.Supplier)\
+      .filter(models.Supplier.SupplierID == id)\
+      .delete()
     db.commit()
