@@ -13,6 +13,7 @@ import secrets
 from fastapi.responses import PlainTextResponse, RedirectResponse
 import random
 import sqlite3
+from .views import router as northwind_api_router
 
 
 app = FastAPI()
@@ -22,6 +23,7 @@ app.counter = 1
 app.access_sessions = []
 app.access_tokens = []
 
+app.include_router(northwind_api_router, tags=["northwind"])
 
 class Patient(BaseModel):
     id: Optional[int] = None
