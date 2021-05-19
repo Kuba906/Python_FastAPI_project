@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from . import models
-from .schemas import NewSupplier, UpdateSupplier
+from schemas import NewSupplier, UpdateSupplier
 from sqlalchemy import update, func
 
 
