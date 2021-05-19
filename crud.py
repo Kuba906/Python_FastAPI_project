@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from . import models
+import models
 import schemas
 from sqlalchemy import update, func
 
