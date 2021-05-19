@@ -13,7 +13,7 @@ import secrets
 from fastapi.responses import PlainTextResponse, RedirectResponse
 import random
 import sqlite3
-from .views import router as northwind_api_router
+from views import router as northwind_api_router
 
 
 app = FastAPI()
