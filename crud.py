@@ -4,6 +4,15 @@ import schemas
 from sqlalchemy import update, func
 from fastapi import HTTPException
 
+def get_shippers(db: Session):
+    return db.query(models.Shipper).all()
+
+
+def get_shipper(db: Session, shipper_id: int):
+    return (
+        db.query(models.Shipper).filter(models.Shipper.ShipperID == shipper_id).first()
+    )
+
 
 def get_suppliers(db: Session):
     return db.query(models.Supplier)\
