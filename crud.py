@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 import models
 import schemas
 from sqlalchemy import update, func
+from fastapi import HTTPException
 
 
 def get_suppliers(db: Session):
