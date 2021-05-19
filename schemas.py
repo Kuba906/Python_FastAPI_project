@@ -1,5 +1,4 @@
 import typing
-
 from pydantic import BaseModel, PositiveInt, constr, validator
 from typing import Optional
 
